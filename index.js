@@ -2,5 +2,8 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-form-validations'
+  name: 'ember-form-validations',
+  isDevelopingAddon: function() {
+    return true;
+  }
 };

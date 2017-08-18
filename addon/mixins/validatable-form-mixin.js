@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import { FORM_ERRORS } from 'canopy-fresh/dictionary';
 
 const { Mixin } = Ember;
 
@@ -18,6 +17,21 @@ export default Mixin.create({
     });
   },
 
+  updateServerError(property, error) {
+    const serverFormErrors = this.get('serverFormErrors');
+    serverFormErrors.set(property, error);
+    this.afterServerErrorUpdate();
+  },
+
+  updateClientError(property, error) {
+    const clientFormErrors = this.get('clientFormErrors');
+    clientFormErrors.set(property, error);
+    this.afterClientErrorUpdate();
+  },
+
+  afterServerErrorUpdate() {},
+  afterClientErrorUpdate() {},
+
   afterClearingFieldError() {},
   afterSettingFieldError() {},
 
@@ -34,16 +48,14 @@ export default Mixin.create({
   actions: {
 
     clearFieldError(field) {
-      const clientFormErrors = this.get('clientFormErrors');
-      clientFormErrors.set(field, null);
+      this.updateClientError(field, null);
       this.__afterClearingFieldError(field);
     },
 
     setFieldError(field) {
-      const clientFormErrors = this.get('clientFormErrors');
       let errorMessage = null;
       if (!this.get(`${field}Valid`)) { errorMessage = this.get('errors')[field] }
-      clientFormErrors.set(field, errorMessage);
+      this.updateClientError(field, errorMessage);
       this.__afterSettingFieldError(field, errorMessage);
     }
   }
