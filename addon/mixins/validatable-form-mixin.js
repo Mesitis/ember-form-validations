@@ -35,6 +35,22 @@ export default Mixin.create({
   afterClearingFieldError() {},
   afterSettingFieldError() {},
 
+  clearClientFormErrors() {
+    const clientFormErrors = this.get('clientFormErrors');
+    Object.keys(clientFormErrors).forEach(key => {
+      clientFormErrors.set(key, null);
+    });
+    this.updateFormStatus();
+  },
+
+  clearServerFormErrors() {
+    const serverFormErrors = this.get('serverFormErrors');
+    Object.keys(serverFormErrors).forEach(key => {
+      serverFormErrors.set(key, null);
+    });
+    this.updateFormStatus();
+  },
+
   __afterClearingFieldError() {
     this.afterClearingFieldError();
     this.updateFormStatus();
