@@ -70,7 +70,9 @@ export default Mixin.create({
 
     setFieldError(field) {
       let errorMessage = null;
-      if (!this.get(`${field}Valid`)) { errorMessage = this.get('errors')[field] }
+      if (!this.get(`${field}Valid`)) {
+        errorMessage = this.get('errors')[field];
+      }
       this.updateClientError(field, errorMessage);
       this.__afterSettingFieldError(field, errorMessage);
     }
