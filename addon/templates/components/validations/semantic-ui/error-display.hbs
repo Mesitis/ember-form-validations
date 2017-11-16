@@ -1,0 +1,23 @@
+{{#if errorsArray}}
+  <div class="ui error message {{identifierClass}}">
+    {{#unless hideHeader}}
+      <div class="{{identifierClass}} header">{{if header header 'Please rectify the following:'}}</div>
+    {{/unless}}
+    {{#if listView}}
+      <ul class="{{identifierClass}} errors list">
+        {{#each errorsArray as |error|}}
+          <li>{{error.message}}</li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p class="{{identifierClass}} errors">
+        {{#each errorsArray as |error|}}
+          {{error.message}}<br>
+        {{/each}}
+        </p>
+    {{/if}}
+    <div class="{{identifierClass}} custom">
+      {{yield}}
+    </div>
+  </div>
+{{/if}}

@@ -1,0 +1,1 @@
+export { default } from 'ember-form-validations/components/validations/semantic-ui/error-display';
