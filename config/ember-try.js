@@ -1,9 +1,9 @@
-/*jshint node:true*/
+/* jshint node:true*/
 module.exports = {
   scenarios: [
     {
-      name: 'ember-lts-2.4',
-      bower: {
+      name  : 'ember-lts-2.4',
+      bower : {
         dependencies: {
           'ember': 'components/ember#lts-2-4'
         },
@@ -18,8 +18,8 @@ module.exports = {
       }
     },
     {
-      name: 'ember-lts-2.8',
-      bower: {
+      name  : 'ember-lts-2.8',
+      bower : {
         dependencies: {
           'ember': 'components/ember#lts-2-8'
         },
@@ -34,8 +34,8 @@ module.exports = {
       }
     },
     {
-      name: 'ember-release',
-      bower: {
+      name  : 'ember-release',
+      bower : {
         dependencies: {
           'ember': 'components/ember#release'
         },
@@ -50,8 +50,8 @@ module.exports = {
       }
     },
     {
-      name: 'ember-beta',
-      bower: {
+      name  : 'ember-beta',
+      bower : {
         dependencies: {
           'ember': 'components/ember#beta'
         },
@@ -66,8 +66,8 @@ module.exports = {
       }
     },
     {
-      name: 'ember-canary',
-      bower: {
+      name  : 'ember-canary',
+      bower : {
         dependencies: {
           'ember': 'components/ember#canary'
         },
@@ -82,8 +82,8 @@ module.exports = {
       }
     },
     {
-      name: 'ember-default',
-      npm: {
+      name : 'ember-default',
+      npm  : {
         devDependencies: {}
       }
     }
