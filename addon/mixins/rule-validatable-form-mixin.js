@@ -1,8 +1,8 @@
 import Mixin from '@ember/object/mixin';
 import { computed } from '@ember/object';
-import { next, run } from '@ember/runloop';
+import { begin, end, next } from '@ember/runloop';
 import { on } from '@ember/object/evented';
-import { keys, pick, assign, forOwn, isArray, isEmpty, sortBy, omit, clone } from 'lodash';
+import { assign, clone, forOwn, isArray, isEmpty, keys, omit, pick, sortBy } from 'lodash';
 
 export default Mixin.create({
 
@@ -34,6 +34,11 @@ export default Mixin.create({
    */
   isFormValid: computed('errorsArray.[]', function() {
     const isValid = isEmpty(this.get('errorsArray'));
+
+    if (this.get('validatableAttributes').length > 0 && !this.get('validationsHaveRun')) {
+      return false;
+    }
+
     // Calling the hook in the next iteration of the run-loop
     // since the computed property `isFormValid` will update only after the current run-loop iteration.
     // This is to ensure the properties' values are in sync with the hooks being called
@@ -61,12 +66,23 @@ export default Mixin.create({
    * @param firstError {boolean} Show only one error per attribute
    * @private
    */
-  _validateAttribute(attributeName, firstError = true) {
+  async _validateAttribute(attributeName, firstError = true) {
     if (!this.get('validatableAttributes').includes(attributeName)) {
       return;
     }
-    const result = validate.single(this.get(attributeName), this.get('validations')[attributeName], { fullMessages: false });
-    console.log(clone(result));
+    let result = await (new Promise(resolve => {
+      validate
+        .async(
+          this.getProperties(attributeName),
+          pick(this.get('validations'), attributeName),
+          {
+            fullMessages: false
+          }
+        )
+        .then(() => resolve())
+        .catch(errors => resolve(errors[attributeName]));
+    }));
+    this.set('validationsHaveRun', true);
     if (result) {
       this.setErrors(attributeName, firstError ? result[0] : result);
     } else {
@@ -125,13 +141,13 @@ export default Mixin.create({
     this.afterSettingFieldError(attributeName, currentErrors[attributeName]);
   },
 
-  validateForm() {
+  async validateForm() {
     // To ensure all the validations occur within a single run-loop.
-    run(() => {
-      for (const attributeName of this.get('validatableAttributes')) {
-        this._validateAttribute(attributeName);
-      }
-    });
+    begin();
+    for (const attributeName of this.get('validatableAttributes')) {
+      await this._validateAttribute(attributeName);
+    }
+    end();
   },
 
   actions: {
@@ -141,18 +157,32 @@ export default Mixin.create({
      * @param attributeName {string} The name of the attribute
      */
     validateField(attributeName) {
-      if (event.type === 'blur') {
-        this._validateAttribute(attributeName);
+      if (['keypress', 'blur', 'input', 'change'].includes(event.type)) {
+        // Running in the next run-loop iteration so that the attribute value is updated during validation
+        next(() => {
+          this._validateAttribute(attributeName);
+        });
       } else {
         this._resetValidation(attributeName);
       }
+    },
+
+    onValid(action) {
+      this.validateForm()
+        .then(() => {
+          next(() => {
+            if (this.get('isFormValid')) {
+              action();
+            }
+          });
+        }).catch(console.error);
     }
   },
 
   /**
    * Initialize the validation rules on object init
    */
-  _init: on('init', function () {
+  _init: on('init', function() {
     if (this.get('getValidations')) {
       this.set('validations', this.getValidations());
     }

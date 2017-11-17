@@ -67,6 +67,7 @@ module.exports = {
   },
   globals: {
     module: true,
+    Promise: true,
     validate: true
   }
 };
