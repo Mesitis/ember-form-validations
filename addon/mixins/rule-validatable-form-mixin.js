@@ -2,13 +2,15 @@ import Mixin from '@ember/object/mixin';
 import { computed } from '@ember/object';
 import { begin, end, next } from '@ember/runloop';
 import { on } from '@ember/object/evented';
-import { assign, clone, forOwn, isArray, isEmpty, keys, omit, pick, sortBy } from 'lodash';
+import { assign, clone, forOwn, isArray, isEmpty, keys, omit, pick, sortBy, filter, isObject } from 'lodash';
 
 export default Mixin.create({
 
   validations: {},
 
   errors: {},
+
+  formAttribute: '_form',
 
   /**
    * Returns all errors in the form of a flat array of objects
@@ -33,7 +35,9 @@ export default Mixin.create({
    * (ie. all fields pass validation)
    */
   isFormValid: computed('errorsArray.[]', function() {
-    const isValid = isEmpty(this.get('errorsArray'));
+    const isValid = isEmpty(
+      filter(this.get('errorsArray'), error => error.attribute !== this.formAttribute)
+    );
 
     if (this.get('validatableAttributes').length > 0 && !this.get('validationsHaveRun')) {
       return false;
@@ -60,16 +64,23 @@ export default Mixin.create({
   }),
 
   /**
+   * True if the form has any errors to display
+   */
+  formHasErrors: computed('errorsArray.[]', function() {
+    return !isEmpty(this.get('errorsArray'));
+  }),
+
+  /**
    * Validate an attribute based on the defined rule
    *
    * @param attributeName {string} The name of the attribute to validate
    * @param firstError {boolean} Show only one error per attribute
-   * @private
    */
-  async _validateAttribute(attributeName, firstError = true) {
+  async validateAttribute(attributeName, firstError = true) {
     if (!this.get('validatableAttributes').includes(attributeName)) {
       return;
     }
+    this.resetValidation(this.formAttribute);
     let result = await (new Promise(resolve => {
       validate
         .async(
@@ -86,7 +97,7 @@ export default Mixin.create({
     if (result) {
       this.setErrors(attributeName, firstError ? result[0] : result);
     } else {
-      this._resetValidation(attributeName);
+      this.resetValidation(attributeName);
     }
   },
 
@@ -94,9 +105,8 @@ export default Mixin.create({
    * Reset the validation on an attribute
    *
    * @param attributeName {string} The name of the attribute to reset
-   * @private
    */
-  _resetValidation(attributeName) {
+  resetValidation(attributeName) {
     let currentErrors = clone(this.get('errors'));
     this.beforeClearingFieldError(attributeName, currentErrors[attributeName]);
     this.set(
@@ -128,24 +138,73 @@ export default Mixin.create({
    *
    * @param attributeName {string} The name of the attribute to set the errors to
    * @param errors {string[]|string} An array of errors
+   * @alias setError
    */
   setErrors(attributeName, errors) {
     if (isEmpty(errors)) {
-      this._resetValidation(attributeName);
+      this.resetValidation(attributeName);
       return;
     }
     let currentErrors = clone(this.get('errors'));
     this.beforeSettingFieldError(attributeName, currentErrors[attributeName]);
     currentErrors[attributeName] = isArray(errors) ? errors : [errors];
+    console.log(attributeName, errors, currentErrors);
     this.set('errors', currentErrors);
     this.afterSettingFieldError(attributeName, currentErrors[attributeName]);
   },
 
+  /**
+   * Set an error of an attribute
+   *
+   * @param attributeName
+   * @param error
+   * @alias setErrors
+   */
+  setError(attributeName, error) {
+    this.setErrors(...arguments);
+  },
+
+  /**
+   * Set a form error
+   *
+   * @param error {string}
+   */
+  setFormError(error) {
+    if (!isArray(error) && isObject(error)) {
+      error = this.getErrorFromObject(error);
+    }
+    this.setErrors(this.formAttribute, error);
+  },
+
+  /**
+   * Remove a form error
+   */
+  removeFormError() {
+    this.resetValidation(this.formAttribute);
+  },
+
+  /**
+   * Get the error message from an object
+   *
+   * @param error
+   * @return {*}
+   */
+  getErrorFromObject(error) {
+    if (!error) {
+      return null;
+    }
+    return error.error ? error.error : (error.message ? error.message : error);
+  },
+
+  /**
+   * Validate the entire form
+   * @return {Promise.<void>}
+   */
   async validateForm() {
     // To ensure all the validations occur within a single run-loop.
     begin();
     for (const attributeName of this.get('validatableAttributes')) {
-      await this._validateAttribute(attributeName);
+      await this.validateAttribute(attributeName);
     }
     end();
   },
@@ -160,10 +219,10 @@ export default Mixin.create({
       if (['keypress', 'blur', 'input', 'change'].includes(event.type)) {
         // Running in the next run-loop iteration so that the attribute value is updated during validation
         next(() => {
-          this._validateAttribute(attributeName);
+          this.validateAttribute(attributeName);
         });
       } else {
-        this._resetValidation(attributeName);
+        this.resetValidation(attributeName);
       }
     },
 
