@@ -73,6 +73,9 @@ export default Mixin.create({
   /**
    * Validate an attribute based on the defined rule
    *
+   * (This is a wrapper over Validate.js's validate method to load and validate only specific
+   * rules/attributes instead of validating all.)
+   *
    * @param attributeName {string} The name of the attribute to validate
    * @param firstError {boolean} Show only one error per attribute
    */
@@ -80,20 +83,49 @@ export default Mixin.create({
     if (!this.get('validatableAttributes').includes(attributeName)) {
       return;
     }
+    this.beforeValidatingField(attributeName);
+
+    const validationRules = pick(this.get('validations'), attributeName);
+    const propertiesToValidate = [attributeName];
+
+    // Load the data of additional properties if it is required for comparative validation
+    forOwn(validationRules[attributeName], (rule, name) => {
+      if (!isArray(rule) && isObject(rule)) {
+        if (name === 'equality') {
+          propertiesToValidate.push(rule.attribute);
+        } else {
+          if (rule.depends) {
+            propertiesToValidate.push(rule.depends);
+          }
+        }
+      } else if (name === 'equality') {
+        propertiesToValidate.push(rule);
+      }
+    });
+
+    if (validationRules[attributeName].equality) {
+      let equalityCheck = validationRules[attributeName].equality;
+      if (!isArray(equalityCheck) && isObject(equalityCheck)) {
+        equalityCheck = equalityCheck.attribute;
+      }
+      propertiesToValidate.push(equalityCheck);
+    }
     this.resetValidation(this.formAttribute);
     let result = await (new Promise(resolve => {
       validate
         .async(
-          this.getProperties(attributeName),
-          pick(this.get('validations'), attributeName),
+          this.getProperties(propertiesToValidate),
+          validationRules,
           {
-            fullMessages: false
+            fullMessages    : false,
+            cleanAttributes : false
           }
         )
         .then(() => resolve())
         .catch(errors => resolve(errors[attributeName]));
     }));
     this.set('validationsHaveRun', true);
+    this.afterValidatingField(attributeName);
     if (result) {
       this.setErrors(attributeName, firstError ? result[0] : result);
     } else {
@@ -148,7 +180,6 @@ export default Mixin.create({
     let currentErrors = clone(this.get('errors'));
     this.beforeSettingFieldError(attributeName, currentErrors[attributeName]);
     currentErrors[attributeName] = isArray(errors) ? errors : [errors];
-    console.log(attributeName, errors, currentErrors);
     this.set('errors', currentErrors);
     this.afterSettingFieldError(attributeName, currentErrors[attributeName]);
   },
@@ -246,6 +277,9 @@ export default Mixin.create({
       this.set('validations', this.getValidations());
     }
   }),
+
+  beforeValidatingField(attributeName) { },
+  afterValidatingField(attributeName) { },
 
   beforeSettingFieldError(attributeName, errors) { },
   afterSettingFieldError(attributeName, errors) { },
