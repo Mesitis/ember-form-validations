@@ -1,19 +1,19 @@
 {
   "name": "ember-form-validations",
-  "version": "0.0.2",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.0.3",
+  "description": "A simple addon for validating forms in ember.js",
   "keywords": [
     "ember-addon",
     "forms",
     "validations"
   ],
   "license": "MIT",
-  "author": "Sarup Banskota",
+  "repository": "https://github.com/mesitis/ember-form-validations",
+  "author": "Canopy Pte. Ltd. <hello@canopy.cloud>",
   "directories": {
     "doc": "doc",
     "test": "tests"
   },
-  "repository": "",
   "scripts": {
     "build": "ember build",
     "start": "ember server",
