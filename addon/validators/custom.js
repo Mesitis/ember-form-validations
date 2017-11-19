@@ -1,3 +1,5 @@
+import { isBoolean, isObjectLike } from 'lodash';
+
 /**
  * A custom validator to which you pass your own method to check validity
  *
@@ -12,10 +14,14 @@ export const custom = (value, options, key, attributes) => {
     Promise
       .resolve(options.executor(value, key, attributes))
       .then(result => {
-        if (result) {
+        if (isBoolean(result) && result === true) {
           resolve();
         } else {
-          reject(options.message);
+          if (isObjectLike(result)) {
+            reject(result.error || result.message || options.message || JSON.stringify(result));
+          } else {
+            reject(result || options.message);
+          }
         }
       })
       .catch(() => reject(options.message));
