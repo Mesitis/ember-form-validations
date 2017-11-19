@@ -10,7 +10,7 @@ import { isBoolean, isObjectLike } from 'lodash';
  * @return {*}
  */
 export const custom = (value, options, key, attributes) => {
-  return new validate.Promise(function(resolve, reject) {
+  return new validate.Promise(function(resolve) {
     Promise
       .resolve(options.executor(value, key, attributes))
       .then(result => {
@@ -18,12 +18,18 @@ export const custom = (value, options, key, attributes) => {
           resolve();
         } else {
           if (isObjectLike(result)) {
-            reject(result.error || result.message || options.message || JSON.stringify(result));
+            resolve(result.error || result.message || options.message || JSON.stringify(result));
           } else {
-            reject(result || options.message);
+            resolve(result || options.message);
           }
         }
       })
-      .catch(() => reject(options.message));
+      .catch(result => {
+        if (isObjectLike(result)) {
+          resolve(result.error || result.message || options.message || JSON.stringify(result));
+        } else {
+          resolve(result || options.message);
+        }
+      });
   });
 };

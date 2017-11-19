@@ -10,6 +10,8 @@ export default Mixin.create({
 
   errors: {},
 
+  validating: {},
+
   formAttribute: '_form',
 
   /**
@@ -83,6 +85,9 @@ export default Mixin.create({
     if (!this.get('validatableAttributes').includes(attributeName)) {
       return;
     }
+
+    this.set(`validating.${attributeName}`, true);
+
     this.beforeValidatingField(attributeName);
 
     const validationRules = pick(this.get('validations'), attributeName);
@@ -124,8 +129,13 @@ export default Mixin.create({
         .then(() => resolve())
         .catch(errors => resolve(errors[attributeName]));
     }));
+
     this.set('validationsHaveRun', true);
+
     this.afterValidatingField(attributeName);
+
+    this.set(`validating.${attributeName}`, false);
+
     if (result) {
       this.setErrors(attributeName, firstError ? result[0] : result);
     } else {
@@ -272,11 +282,14 @@ export default Mixin.create({
   /**
    * Initialize the validation rules on object init
    */
-  _init: on('init', function() {
-    if (this.get('getValidations')) {
-      this.set('validations', this.getValidations());
-    }
-  }),
+  init() {
+    this._super(...arguments);
+    this.set('validations', this.getValidations());
+  },
+
+  getValidations() {
+    return this.get('validations');
+  },
 
   beforeValidatingField(attributeName) { },
   afterValidatingField(attributeName) { },
