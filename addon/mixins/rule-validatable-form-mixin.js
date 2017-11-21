@@ -2,7 +2,7 @@ import Mixin from '@ember/object/mixin';
 import { computed } from '@ember/object';
 import { begin, end, next } from '@ember/runloop';
 import { on } from '@ember/object/evented';
-import { assign, clone, forOwn, isArray, isEmpty, keys, omit, pick, sortBy, filter, isObject } from 'lodash';
+import { assign, clone, forOwn, isArray, isEmpty, keys, omit, pick, sortBy, filter, isObject, throttle, get, set } from 'lodash';
 
 export default Mixin.create({
 
@@ -284,9 +284,32 @@ export default Mixin.create({
    */
   init() {
     this._super(...arguments);
-    this.set('validations', this.getValidations());
+    this.loadValidations();
   },
 
+  /**
+   * Load the validation rules
+   */
+  loadValidations() {
+    const validations = this.getValidations();
+    for (const attribute of keys(validations)) {
+      if (get(validations, `${attribute}.custom.executor`)) {
+        set(
+          validations,
+          `${attribute}.custom.executor`,
+          throttle(
+            get(validations, `${attribute}.custom.executor`),
+            get(validations, `${attribute}.custom.throttle`, 1000)
+          )
+        );
+      }
+    }
+    this.set('validations', validations);
+  },
+
+  /**
+   * Get validation rules
+   */
   getValidations() {
     return this.get('validations');
   },
