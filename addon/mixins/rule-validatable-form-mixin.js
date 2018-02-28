@@ -268,14 +268,11 @@ export default Mixin.create({
     },
 
     onValid(action) {
-      this.validateForm()
-        .then(() => {
-          next(() => {
-            if (this.get('isFormValid')) {
-              action();
-            }
-          });
-        }).catch(console.error);
+      next(() => {
+        if (this.get('isFormValid')) {
+          action();
+        }
+      });
     }
   },
 
