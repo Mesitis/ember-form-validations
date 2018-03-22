@@ -116,7 +116,7 @@ export default Mixin.create({
       propertiesToValidate.push(equalityCheck);
     }
     this.resetValidation(this.formAttribute);
-    let result = await (new Promise(resolve => {
+    let result = await(new Promise(resolve => {
       validate
         .async(
           this.getProperties(propertiesToValidate),
@@ -255,8 +255,9 @@ export default Mixin.create({
      * Validate/Revalidate/Reset a field based on the event
      *
      * @param attributeName {string} The name of the attribute
+     * @param event {Event} the DOM event associated with the action.
      */
-    validateField(attributeName) {
+    validateField(attributeName, event) {
       if (['keypress', 'blur', 'input', 'change'].includes(event.type)) {
         // Running in the next run-loop iteration so that the attribute value is updated during validation
         next(() => {
