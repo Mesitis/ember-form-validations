@@ -1,8 +1,7 @@
 import Mixin from '@ember/object/mixin';
 import { computed } from '@ember/object';
 import { begin, end, next } from '@ember/runloop';
-import { on } from '@ember/object/evented';
-import { assign, clone, forOwn, isArray, isEmpty, keys, omit, pick, sortBy, filter, isObject, throttle, get, set } from 'lodash';
+import { clone, forOwn, isArray, isEmpty, keys, omit, pick, sortBy, filter, isObject, throttle, get, set } from 'lodash';
 
 export default Mixin.create({
 
@@ -268,7 +267,10 @@ export default Mixin.create({
       }
     },
 
-    onValid(action) {
+    async onValid(action, revalidateForm) {
+      if (revalidateForm) {
+        await this.validateForm();
+      }
       next(() => {
         if (this.get('isFormValid')) {
           action();

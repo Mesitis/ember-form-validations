@@ -3,7 +3,7 @@
 
 module.exports = {
   name: 'ember-form-validations',
-  isDevelopingAddon: function() {
+  isDevelopingAddon() {
     return true;
   },
   included(app) {
