@@ -1,4 +1,6 @@
-import { isBoolean, isObjectLike } from 'lodash';
+import isBoolean from 'lodash-es/isBoolean';
+import isObjectLike from 'lodash-es/isObjectLike';
+import validate from 'validate.js';
 
 /**
  * A custom validator to which you pass your own method to check validity
