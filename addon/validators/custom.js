@@ -12,26 +12,24 @@ import validate from 'validate.js';
  * @return {*}
  */
 export const custom = (value, options, key, attributes) => {
-  return new validate.Promise(function(resolve) {
-    Promise
-      .resolve(options.executor(value, key, attributes))
-      .then(result => {
-        if (isBoolean(result) && result === true) {
-          resolve();
-        } else {
-          if (isObjectLike(result)) {
-            resolve(result.error || result.message || options.message || JSON.stringify(result));
-          } else {
-            resolve(result || options.message);
-          }
-        }
-      })
-      .catch(result => {
+  return new validate.Promise(async function(resolve) {
+    try {
+      const result = await options.executor(value, key, attributes);
+      if (isBoolean(result) && result === true) {
+        resolve();
+      } else {
         if (isObjectLike(result)) {
           resolve(result.error || result.message || options.message || JSON.stringify(result));
         } else {
           resolve(result || options.message);
         }
-      });
+      }
+    } catch (errorResult) {
+      if (isObjectLike(errorResult)) {
+        resolve(errorResult.error || errorResult.message || options.message || JSON.stringify(errorResult));
+      } else {
+        resolve(errorResult || options.message);
+      }
+    }
   });
 };

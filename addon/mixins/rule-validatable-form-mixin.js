@@ -51,10 +51,10 @@ export default Mixin.create({
    */
   isFormValid: computed('errorsArray.[]', function() {
     const isValid = isEmpty(
-      filter(this.get('errorsArray'), error => error.attribute !== this.formAttribute)
+      filter(this.errorsArray, error => error.attribute !== this.formAttribute)
     );
 
-    if (this.get('validatableAttributes').length > 0 && !this.get('validationsHaveRun')) {
+    if (this.validatableAttributes.length > 0 && !this.validationsHaveRun) {
       return false;
     }
 
@@ -75,14 +75,14 @@ export default Mixin.create({
    * An array of attributes that have a validation rule
    */
   validatableAttributes: computed('validations', function() {
-    return keys(this.get('validations') || {});
+    return keys(this.validations || {});
   }),
 
   /**
    * True if the form has any errors to display
    */
   formHasErrors: computed('errorsArray.[]', function() {
-    return !isEmpty(this.get('errorsArray'));
+    return !isEmpty(this.errorsArray);
   }),
 
   /**
@@ -95,7 +95,7 @@ export default Mixin.create({
    * @param firstError {boolean} Show only one error per attribute
    */
   async validateAttribute(attributeName, firstError = true) {
-    if (!this.get('validatableAttributes').includes(attributeName)) {
+    if (!this.validatableAttributes.includes(attributeName)) {
       return;
     }
 
@@ -103,7 +103,7 @@ export default Mixin.create({
 
     this.beforeValidatingField(attributeName);
 
-    const validationRules = pick(this.get('validations'), attributeName);
+    const validationRules = pick(this.validations, attributeName);
     const propertiesToValidate = [attributeName];
 
     // Load the data of additional properties if it is required for comparative validation
@@ -162,7 +162,7 @@ export default Mixin.create({
    * @param attributeName {string} The name of the attribute to reset
    */
   resetValidation(attributeName) {
-    let currentErrors = clone(this.get('errors'));
+    let currentErrors = clone(this.errors);
     this.beforeClearingFieldError(attributeName, currentErrors[attributeName]);
     this.set(
       'errors',
@@ -184,7 +184,7 @@ export default Mixin.create({
     if (isEmpty(error)) {
       return;
     }
-    const currentErrors = this.get('errors');
+    const currentErrors = this.errors;
     this.setErrors(attributeName, (currentErrors[attributeName] || []).concat([error]));
   },
 
@@ -200,7 +200,7 @@ export default Mixin.create({
       this.resetValidation(attributeName);
       return;
     }
-    let currentErrors = clone(this.get('errors'));
+    let currentErrors = clone(this.errors);
     this.beforeSettingFieldError(attributeName, currentErrors[attributeName]);
     currentErrors[attributeName] = isArray(errors) ? errors : [errors];
     this.set('errors', currentErrors);
@@ -257,7 +257,7 @@ export default Mixin.create({
   async validateForm() {
     // To ensure all the validations occur within a single run-loop.
     begin();
-    for (const attributeName of this.get('validatableAttributes')) {
+    for (const attributeName of this.validatableAttributes) {
       await this.validateAttribute(attributeName);
     }
     end();
@@ -286,7 +286,7 @@ export default Mixin.create({
         await this.validateForm();
       }
       next(() => {
-        if (this.get('isFormValid')) {
+        if (this.isFormValid) {
           action();
         }
       });
@@ -325,7 +325,7 @@ export default Mixin.create({
    * Get validation rules
    */
   getValidations() {
-    return this.get('validations');
+    return this.validations;
   },
 
   beforeValidatingField(attributeName) { },

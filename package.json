@@ -1,6 +1,6 @@
 {
   "name": "ember-form-validations",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "A simple addon for validating forms in ember.js",
   "keywords": [
     "ember-addon",
