@@ -1,7 +1,21 @@
 import Mixin from '@ember/object/mixin';
 import { computed } from '@ember/object';
 import { begin, end, next } from '@ember/runloop';
-import { clone, forOwn, isArray, isEmpty, keys, omit, pick, sortBy, filter, isObject, throttle, get, set } from 'lodash';
+import validate from 'validate.js';
+
+import set from 'lodash-es/set';
+import get from 'lodash-es/get';
+import keys from 'lodash-es/keys';
+import pick from 'lodash-es/pick';
+import omit from 'lodash-es/omit';
+import clone from 'lodash-es/clone';
+import forOwn from 'lodash-es/forOwn';
+import filter from 'lodash-es/filter';
+import sortBy from 'lodash-es/sortBy';
+import isArray from 'lodash-es/isArray';
+import isEmpty from 'lodash-es/isEmpty';
+import throttle from 'lodash-es/throttle';
+import isObject from 'lodash-es/isObject';
 
 export default Mixin.create({
 

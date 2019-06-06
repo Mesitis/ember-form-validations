@@ -8,6 +8,5 @@ module.exports = {
   },
   included(app) {
     this._super.included.apply(this, arguments);
-    app.import('node_modules/@bower_components/validate/validate.min.js');
   }
 };
