@@ -1,6 +1,6 @@
 {
   "name": "ember-form-validations",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "description": "A simple addon for validating forms in ember.js",
   "keywords": [
     "ember-addon",
@@ -50,7 +50,7 @@
     "loader.js": "^4.7.0"
   },
   "engines": {
-    "node": ">= 0.12.0"
+    "node": "8.* || >= 10.*"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"
