@@ -1,12 +1,12 @@
-import validators from '../validators';
-import assign from 'lodash-es/assign';
+import { customIndicative, custom } from '../validators/custom';
 import validate from 'validate.js';
+import indicative from 'indicative';
 
 export function initialize() {
-  // Make validate.js use Ember's Promise class for all its promises
   validate.Promise = Promise;
   // Load custom validators
-  assign(validate.validators, validators);
+  validate.validators.custom = custom;
+  indicative.validations.custom = customIndicative;
 }
 
 export default {
