@@ -143,7 +143,6 @@ export default Mixin.create({
     try {
       await indicative.validate(this.getProperties(propertiesToValidate), validationRules, this.messages);
     } catch (results) {
-      console.log('results:', attributeName, results);
       for (const result of results) {
         if (result.field === attributeName) {
           errors.push(result.message);
