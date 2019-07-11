@@ -1,6 +1,6 @@
 {
   "name": "ember-form-validations",
-  "version": "0.0.15-beta.5",
+  "version": "0.0.15-beta.6",
   "description": "A simple addon for validating forms in ember.js",
   "keywords": [
     "ember-addon",
@@ -23,12 +23,12 @@
   },
   "dependencies": {
     "babel-loader": "^8.0.6",
-    "ember-auto-import": "^1.5.1",
+    "ember-auto-import": "^1.5.2",
     "ember-cli-babel": "^7.7.3",
     "ember-cli-htmlbars": "^3.0.1",
     "ember-cli-htmlbars-inline-precompile": "^2.1.0",
     "indicative": "^5.0.8",
-    "lodash-es": "^4.17.13",
+    "lodash-es": "^4.17.14",
     "validate.js": "^0.13.1"
   },
   "devDependencies": {
